@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BinaryShop | Hardware y Electrónica</title>
+    <meta name="description"
+        content="Tienda de hardware, computación y electrónica. Compra y venta directa en BinaryShop.">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+
+
+    <!-- 2. Encabezado Principal y Barra de Navegación -->
+    <header class="header-main">
+        <div class="container nav-wrapper">
+            <a href="#" class="logo" onclick="app.cambiarVista('catalogo'); return false;">
+                <span>BinaryShop</span>
+            </a>
+
+            <!-- Buscador en tiempo real de artículos -->
+            <div class="search-box">
+                <input type="text" id="input-busqueda" placeholder="Buscar laptops, componentes, periféricos..."
+                    oninput="app.filtrarProductos()">
+            </div>
+
+            <!-- Acciones de Navegación y Perfil -->
+            <div class="nav-actions">
+                <div id="auth-buttons-container">
+                    <button type="button" class="nav-btn nav-btn-primary" onclick="app.abrirModalAuth('login')">Iniciar
+                        Sesión</button>
+                    <button type="button" class="nav-btn" onclick="app.abrirModalAuth('registro')">Registrarse</button>
+                </div>
+
+                <div id="user-info-container" class="hidden" style="display: flex; align-items: center; gap: 8px;">
+                    <span id="user-badge" class="badge-tag"
+                        style="background:#e2e8f0; color:#0f172a; border-color:#cbd5e1; font-weight: 600;"></span>
+                    <button type="button" id="btn-habilitar-venta" class="nav-btn hidden"
+                        onclick="app.abrirModalHabilitarVenta()"
+                        title="Habilitar opciones de venta para este comprador">Habilitar Venta</button>
+                    <button type="button" class="nav-btn" onclick="app.cerrarSesion()">Salir</button>
+                </div>
+
+                <!-- Botón de Carrito -->
+                <button type="button" class="nav-btn cart-btn" onclick="app.abrirModalCarrito()">
+                    Carrito <span id="cart-counter" class="cart-count-badge">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 3. Pestañas de Navegación de Vistas -->
+    <nav class="view-tabs">
+        <div class="container tabs-container">
+            <button type="button" class="tab-btn active" id="tab-catalogo"
+                onclick="app.cambiarVista('catalogo')">Catálogo General</button>
+            <button type="button" class="tab-btn hidden" id="tab-vendedor" onclick="app.cambiarVista('vendedor')">Panel
+                de Vendedor</button>
+            <button type="button" class="tab-btn hidden" id="tab-admin" onclick="app.cambiarVista('admin')">Panel de
+                Administración</button>
+        </div>
+    </nav>
+
+    <!-- 4. Banner Destacado / Hero -->
+    <section class="hero-banner" id="hero-banner">
+        <div class="container hero-content">
+            <div class="hero-text">
+                <h1>Hardware y Electrónica de Alta Gama</h1>
+                <p>Compra tecnología en una plataforma confiable.</p>
+                <div class="hero-pills">
+                    <span class="badge-tag">Garantía Directa</span>
+                    <span class="badge-tag">Pagos Protegidos</span>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. Contenido Principal -->
+    <main class="container" style="flex: 1; padding-bottom: 40px;">
+
+        <!-- VISTA: Catálogo de Productos -->
+        <section id="vista-catalogo">
+            <div class="section-title">
+                <h2>Artículos Disponibles</h2>
+                <div style="font-size: 0.9rem; font-weight: normal; color: var(--color-text-muted);">
+                    Mostrando <span id="total-articulos-mostrados">0</span> productos
+                </div>
+            </div>
+
+            <!-- Grilla donde se insertan los productos con JavaScript -->
+            <div id="contenedor-productos" class="catalog-grid"></div>
+        </section>
+
+        <!-- VISTA: Panel de Vendedor -->
+        <section id="vista-vendedor" class="hidden">
+            <div class="panel-section">
+                <div class="panel-header">
+                    <h2>Publicar Nuevo Producto</h2>
+                    <span class="badge-tag" style="background: #2563eb; color: white;">Rol Vendedor</span>
+                </div>
+
+                <form id="form-publicar-producto" onsubmit="app.manejadorPublicarProducto(event)">
+                    <div class="form-grid">
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label for="prod-desc">Nombre y Descripción del Artículo *</label>
+                            <input type="text" id="prod-desc" required placeholder="Ej: Disco Solido SSD NVMe 1TB Gen4">
+                        </div>
+                        <div class="form-group">
+                            <label for="prod-precio">Precio en Dólares ($) *</label>
+                            <input type="number" id="prod-precio" step="0.01" min="0.5" required
+                                placeholder="Ej: 79.99">
+                        </div>
+                        <div class="form-group">
+                            <label for="prod-stock">Stock Inicial *</label>
+                            <input type="number" id="prod-stock" min="1" required placeholder="Ej: 10">
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label for="prod-imagen">URL de la Imagen *</label>
+                            <input type="url" id="prod-imagen" required placeholder="https://ejemplo.com/imagen.jpg">
+                        </div>
+                    </div>
+                    <button type="submit" class="nav-btn nav-btn-primary" style="padding: 10px 20px;">Publicar Artículo
+                        en Catálogo</button>
+                </form>
+            </div>
+
+            <!-- Mis Artículos Publicados en el Catálogo -->
+            <div class="panel-section">
+                <div class="panel-header">
+                    <h2>Mis Artículos Publicados</h2>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Descripción</th>
+                                <th>Precio</th>
+                                <th>Stock</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-vendedor-productos-body">
+                            <!-- Filas generadas dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Historial de Ventas del Vendedor (Según Diagrama UML) -->
+            <div class="panel-section">
+                <div class="panel-header">
+                    <h2>Historial de Mis Ventas Registradas</h2>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Código Venta</th>
+                                <th>Fecha</th>
+                                <th>Artículo</th>
+                                <th>Comprador</th>
+                                <th>Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-ventas-body">
+                            <!-- Filas generadas dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- VISTA: Panel de Administrador -->
+        <section id="vista-admin" class="hidden">
+            <!-- Gestión de Usuarios (Eliminar cuenta) -->
+            <div class="panel-section">
+                <div class="panel-header">
+                    <h2>Moderación de Usuarios</h2>
+                    <span class="badge-tag" style="background: #0f172a; color: white;">Rol Administrador</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre Completo</th>
+                                <th>Nickname</th>
+                                <th>Dirección</th>
+                                <th>Rol</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-usuarios-body">
+                            <!-- Filas generadas dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Gestión de Productos (Remover producto) -->
+            <div class="panel-section">
+                <div class="panel-header">
+                    <h2>Moderación de Catálogo (Remover Artículos)</h2>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Descripción</th>
+                                <th>Precio</th>
+                                <th>Stock</th>
+                                <th>Vendedor</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-admin-productos-body">
+                            <!-- Filas generadas dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ========================================================
+         MODALES INTERACTIVOS
+         ======================================================== -->
+
+    <!-- Modal 1: Autenticación (Login / Registro) -->
+    <div id="modal-auth" class="modal-overlay">
+        <div class="modal-window">
+            <div class="modal-header">
+                <h3 id="modal-auth-title">Iniciar Sesión</h3>
+                <button type="button" class="btn-close-modal" onclick="app.cerrarModal('modal-auth')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Selector de pestaña interna: Login o Registro -->
+                <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+                    <button type="button" id="auth-subtab-login" class="nav-btn nav-btn-primary" style="flex:1;"
+                        onclick="app.cambiarSubtabAuth('login')">Entrar</button>
+                    <button type="button" id="auth-subtab-registro" class="nav-btn" style="flex:1;"
+                        onclick="app.cambiarSubtabAuth('registro')">Registrarse</button>
+                </div>
+
+                <!-- Formulario Login -->
+                <form id="form-login" onsubmit="app.manejadorLogin(event)">
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label for="login-nickname">Nickname *</label>
+                        <input type="text" id="login-nickname" required placeholder="Tu nombre de usuario">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label for="login-password">Contraseña *</label>
+                        <input type="password" id="login-password" required placeholder="Contraseña">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label for="login-rol">Rol correspondiente *</label>
+                        <select id="login-rol" required>
+                            <option value="Comprador">Comprador</option>
+                            <option value="Vendedor">Vendedor</option>
+                            <option value="Administrador">Administrador</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="nav-btn nav-btn-primary"
+                        style="width: 100%; justify-content: center; padding: 12px;">Iniciar Sesión</button>
+                </form>
+
+                <!-- Formulario Registro -->
+                <form id="form-registro" class="hidden" onsubmit="app.manejadorRegistro(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="reg-nombre">Nombre *</label>
+                            <input type="text" id="reg-nombre" required placeholder="Nombre">
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-apellido">Apellido *</label>
+                            <input type="text" id="reg-apellido" required placeholder="Apellido">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label for="reg-direccion">Dirección Personal *</label>
+                        <input type="text" id="reg-direccion" required placeholder="Ej: Av. Principal Edif. 10">
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="reg-nickname">Nickname *</label>
+                            <input type="text" id="reg-nickname" required placeholder="usuario123">
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-password">Contraseña *</label>
+                            <input type="password" id="reg-password" required placeholder="******">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label for="reg-bancarios">Datos Bancarios (Tarjeta o Cuenta) *</label>
+                        <input type="text" id="reg-bancarios" required placeholder="Ej: 4500 1234 5678 9010">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label for="reg-rol">Seleccionar Rol *</label>
+                        <select id="reg-rol" required>
+                            <option value="Comprador">Comprador</option>
+                            <option value="Vendedor">Vendedor</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="nav-btn nav-btn-primary"
+                        style="width: 100%; justify-content: center; padding: 12px;">Crear Cuenta</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: Carrito de Compras -->
+    <div id="modal-carrito" class="modal-overlay">
+        <div class="modal-window">
+            <div class="modal-header">
+                <h3>Mi Carrito de Compras</h3>
+                <button type="button" class="btn-close-modal"
+                    onclick="app.cerrarModal('modal-carrito')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="carrito-items-lista">
+                    <!-- Filas de items agregadas dinámicamente -->
+                </div>
+
+                <div class="cart-total-box">
+                    <span>Total a pagar:</span>
+                    <span id="cart-total-monto" style="color: var(--color-primary); font-size: 1.3rem;">$0.00</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="nav-btn" onclick="app.vaciarCarrito()">Vaciar Carrito</button>
+                <button type="button" class="nav-btn nav-btn-primary" onclick="app.iniciarCheckoutCarrito()">Procesar
+                    Compra del Carrito</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3: Comprar Inmediatamente / Pasarela de Pagos (Diagrama de Secuencia) -->
+    <div id="modal-checkout" class="modal-overlay">
+        <div class="modal-window">
+            <div class="modal-header">
+                <h3>Pasarela de Pagos - BinaryShop</h3>
+                <button type="button" class="btn-close-modal"
+                    onclick="app.cerrarModal('modal-checkout')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="checkout-resumen-producto"
+                    style="background:#f1f5f9; padding:12px; border-radius:var(--radius-md); margin-bottom: 16px;">
+                    <!-- Detalle del producto a comprar -->
+                </div>
+
+                <form id="form-pago-inmediato" onsubmit="app.confirmarPagoInmediato(event)">
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label for="checkout-datos-bancarios">Número de Tarjeta o Cuenta Bancaria *</label>
+                        <input type="text" id="checkout-datos-bancarios" required placeholder="Ej: 4532 8901 2345 6789">
+                    </div>
+
+                    <div style="margin-top: 16px; display: flex; gap: 8px;">
+                        <button type="button" class="nav-btn" style="flex:1;"
+                            onclick="app.cerrarModal('modal-checkout')">Cancelar</button>
+                        <button type="submit" class="nav-btn nav-btn-primary" style="flex:2;">Confirmar y Procesar
+                            Pago</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 4: Recibo de Compra (Paso 12 del Diagrama de Secuencia) -->
+    <div id="modal-recibo" class="modal-overlay">
+        <div class="modal-window">
+            <div class="modal-header">
+                <h3>Recibo Oficial de Compra</h3>
+                <button type="button" class="btn-close-modal" onclick="app.cerrarModal('modal-recibo')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="receipt-box" id="recibo-contenido">
+                    <!-- Contenido dinámico del recibo -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="nav-btn" onclick="window.print()">Imprimir Recibo</button>
+                <button type="button" class="nav-btn nav-btn-primary"
+                    onclick="app.cerrarModal('modal-recibo')">Finalizar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 5: Habilitar Opciones de Venta (Caso de Uso "Habilitar opciones de venta") -->
+    <div id="modal-habilitar-venta" class="modal-overlay">
+        <div class="modal-window">
+            <div class="modal-header">
+                <h3>Habilitar Opciones de Venta</h3>
+                <button type="button" class="btn-close-modal"
+                    onclick="app.cerrarModal('modal-habilitar-venta')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 14px; font-size: 0.95rem;">
+                    Al habilitar tu cuenta como vendedor podrás publicar artículos en el catálogo de <strong>BinaryShop</strong> y gestionar tus ventas.
+                </p>
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label for="upgrade-bancarios">Confirmar o actualizar datos bancarios para recibir pagos *</label>
+                    <input type="text" id="upgrade-bancarios" required placeholder="Número de cuenta o tarjeta">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="nav-btn"
+                    onclick="app.cerrarModal('modal-habilitar-venta')">Cancelar</button>
+                <button type="button" class="nav-btn nav-btn-primary" onclick="app.confirmarHabilitarVenta()">Activar
+                    Modo Vendedor</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. Contenedor Flotante de Notificaciones Toast -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- 7. Pie de Página -->
+    <footer class="footer-main">
+        <div class="container footer-content">
+            <div>
+                <strong>BinaryShop</strong> &copy; 2026. Todos los derechos reservados.
+            </div>
+            <div style="color: var(--color-text-muted); font-size: 0.8rem;">
+                Términos y Condiciones &bull; Privacidad &bull; Soporte
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts del Sistema en orden de dependencia -->
+    <script src="js/models.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
